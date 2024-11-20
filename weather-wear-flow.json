@@ -1,0 +1,252 @@
+[
+    {
+        "id": "main.flow",
+        "type": "tab",
+        "label": "main",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e21164a6.b06098",
+        "type": "OpenAI",
+        "z": "main.flow",
+        "name": "OpenAI",
+        "operation": "SingleQAndA",
+        "caModel": "gpt-3.5-turbo",
+        "aiSystemContext": "You are a fun and trendy virtual stylist who provides outfit recommendations based on the weather data. For each recommendation, consider the temperature, precipitation, wind, and time of day, and suggest clothing that's both comfortable and stylish. Be playful in tone, and add a bit of flair to make the user excited about dressing for the weather. Ensure the suggestions are practical yet fashionable. Start each response with a friendly greeting like 'Hey fashionista!' or 'Let’s get you looking fabulous for today’s weather!'",
+        "aiQuestion": "'Recommend what clothes to wear based on the current weather conditions in the city: ' & vars.city",
+        "apikey": "",
+        "functions": [
+            {
+                "fname": "weather_forecast",
+                "fdesc": "A tool that provides detailed weather forecasts based on a specified location",
+                "fparams": "",
+                "fi": "541089"
+            }
+        ],
+        "maxInvocations": 5,
+        "outputs": 2,
+        "x": 361.5,
+        "y": 155,
+        "wires": [
+            [
+                "1a6c5175.2f477f"
+            ],
+            [
+                "dcdcc608.55be68"
+            ]
+        ],
+        "caname": "OpenAI",
+        "category": "AI"
+    },
+    {
+        "id": "dc0658e.77533a8",
+        "type": "Assertion",
+        "z": "main.flow",
+        "name": "check response",
+        "selector": "statusCode",
+        "property": "hello",
+        "comparison": "equals",
+        "value": "200",
+        "valueType": "str",
+        "x": 262.5,
+        "y": 420,
+        "wires": [
+            [
+                "73fdf787.7cda88"
+            ]
+        ],
+        "caname": "test-assertion",
+        "category": "testing"
+    },
+    {
+        "id": "73fdf787.7cda88",
+        "type": "TestCaseEnd",
+        "z": "main.flow",
+        "name": "TestCaseEnd",
+        "x": 422.5,
+        "y": 420,
+        "wires": [],
+        "caname": "test-case-end",
+        "category": "testing"
+    },
+    {
+        "id": "605cf43d.62556c",
+        "type": "HTTPTestCase",
+        "z": "main.flow",
+        "name": "Test /what to wear in Sydney",
+        "method": "GET",
+        "path": "/what-to-wear?city=sydney",
+        "headers": {
+            "Accept": "application/json"
+        },
+        "authtype": "none",
+        "secUser": "",
+        "secPassword": "",
+        "secToken": "",
+        "payload": "",
+        "mocks": [],
+        "x": 120,
+        "y": 420,
+        "wires": [
+            [
+                "dc0658e.77533a8"
+            ]
+        ],
+        "caname": "http-test-case",
+        "category": "testing"
+    },
+    {
+        "id": "213456f6.543efa",
+        "type": "HTTP Req",
+        "z": "main.flow",
+        "name": "Weather API",
+        "method": "GET",
+        "ret": "txt",
+        "url": "vars.url",
+        "responseTimeout": "",
+        "maxRetries": "",
+        "followRedirect": "true",
+        "maxRedirects": "",
+        "headers": {},
+        "authtype": "none",
+        "secUser": "",
+        "secPassword": "",
+        "secToken": "",
+        "x": 601.5,
+        "y": 75,
+        "wires": [
+            [
+                "57d0ade7.33fe74"
+            ]
+        ],
+        "caname": "httprequest",
+        "category": "web"
+    },
+    {
+        "id": "1a6c5175.2f477f",
+        "type": "Function",
+        "z": "main.flow",
+        "name": "Set Weather API URL",
+        "query": "const apikey = env.WEATHERSTACK_API;\n\nvars.url = `http://api.weatherstack.com/current?access_key=${apikey}&query=${vars.city}`\n\nreturn msg;",
+        "x": 501.5,
+        "y": 75,
+        "wires": [
+            [
+                "213456f6.543efa"
+            ]
+        ],
+        "caname": "function",
+        "category": "transformation"
+    },
+    {
+        "id": "e342566a.2d2378",
+        "type": "Set-Property",
+        "z": "main.flow",
+        "name": "Store City",
+        "rules": [
+            {
+                "t": "set",
+                "p": "city",
+                "pt": "cavars",
+                "to": "header.event.Records[0].queryStringParameters.city",
+                "tot": "camsg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 237.5,
+        "y": 154,
+        "wires": [
+            [
+                "e21164a6.b06098"
+            ]
+        ],
+        "caname": "setproperty",
+        "category": "transformation"
+    },
+    {
+        "id": "dcdcc608.55be68",
+        "type": "EventListener-End",
+        "z": "main.flow",
+        "name": "Return results",
+        "statusCode": "200",
+        "responseType": "http",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "payload": "msg.payload",
+        "eventPayload": "",
+        "eventType": "success",
+        "x": 502.5,
+        "y": 200,
+        "wires": [],
+        "caname": "eventlistenerend",
+        "category": "general"
+    },
+    {
+        "id": "57d0ade7.33fe74",
+        "type": "OpenAIToolEnd",
+        "z": "main.flow",
+        "name": "Return weather data",
+        "x": 721.5,
+        "y": 75,
+        "wires": [],
+        "caname": "OpenAI",
+        "category": "AI"
+    },
+    {
+        "id": "34383c6.9bcb4c4",
+        "type": "EventListener",
+        "z": "main.flow",
+        "name": "GET /wear",
+        "provider": "aws",
+        "eventSource": "api",
+        "dynamodbOperation": "",
+        "apiMethod": "get",
+        "apiUrl": "/wear",
+        "albMethod": "any",
+        "albUrl": "",
+        "bucketName": "",
+        "prefix": "",
+        "suffix": "",
+        "event": "ObjectCreated:*",
+        "cognitoTrigger": "any",
+        "reference": "",
+        "queueName": "",
+        "topicName": "",
+        "partnerDetailType": "",
+        "websocketRoute": "",
+        "websocketCustom": "",
+        "s3Operation": "ALL",
+        "s3BucketName": "",
+        "s3Prefix": "",
+        "s3Suffix": "",
+        "keventSource": "",
+        "kapiMethod": "any",
+        "kapiUrl": "",
+        "kcronexpression": "",
+        "kreference": "",
+        "kObjectStoreOperation": "all",
+        "kObjectStoreName": "",
+        "zeventSource": "zapi",
+        "zapiMethod": "any",
+        "zapiUrl": "/xxs",
+        "neventSource": "ntask",
+        "napiMethod": "get",
+        "napiUrl": "/what-to-wear",
+        "ntaskName": "flows/import",
+        "x": 128.5,
+        "y": 154,
+        "wires": [
+            [
+                "e342566a.2d2378"
+            ]
+        ],
+        "caname": "event-handler",
+        "category": "general"
+    }
+]
